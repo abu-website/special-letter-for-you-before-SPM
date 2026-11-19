@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4a2e1c">
+<title>A Special Letter for You</title>
+<style>
+:root{
+  --ink:#3d281b;--dark:#2c1a11;--paper:#ead8b6;--paper2:#f3e6ca;
+  --accent:#8b5e3c;--muted:#80664d;--line:rgba(87,55,31,.22);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:var(--ink);
+  font-family:Georgia,"Times New Roman",serif;
+  background:
+   radial-gradient(ellipse at 14% 18%,rgba(89,48,22,.23),transparent 19%),
+   radial-gradient(ellipse at 84% 78%,rgba(102,61,29,.18),transparent 22%),
+   radial-gradient(ellipse at 75% 10%,rgba(120,75,38,.13),transparent 15%),
+   repeating-linear-gradient(8deg,rgba(80,49,25,.025) 0 1px,transparent 1px 4px),
+   linear-gradient(135deg,#bda17a,#d7c19a 45%,#b99a70);
+  padding:28px 16px 34px;
+}
+.page{max-width:780px;margin:0 auto}
+header{text-align:center;margin:8px auto 26px}
+.eyebrow{font-size:.75rem;letter-spacing:.28em;text-transform:uppercase;color:#65472e}
+h1{font-size:clamp(2.1rem,7vw,3.8rem);font-weight:normal;line-height:1.05;margin:13px 0 12px;text-shadow:1px 2px 0 rgba(255,255,255,.22)}
+.subtitle{max-width:560px;margin:auto;font-size:1rem;line-height:1.7;color:#62472f}
+.rule{display:flex;align-items:center;gap:12px;max-width:300px;margin:22px auto;color:#8b6845}
+.rule:before,.rule:after{content:"";height:1px;background:var(--line);flex:1}
+.panel{
+ background:linear-gradient(145deg,rgba(247,235,208,.94),rgba(225,204,165,.96));
+ border:1px solid rgba(87,55,31,.35);box-shadow:0 18px 50px rgba(48,29,14,.25),inset 0 0 45px rgba(128,83,42,.12);
+ padding:clamp(20px,5vw,42px);position:relative;border-radius:3px;
+}
+.panel:before{content:"";position:absolute;inset:8px;border:1px solid rgba(112,76,43,.22);pointer-events:none}
+.select-area{position:relative;z-index:1;text-align:center}
+label{display:block;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;color:#755438}
+select{
+ width:min(100%,430px);padding:13px 15px;border:1px solid #9c7954;border-radius:2px;
+ background:#f5e9cf;color:var(--ink);font:1rem Georgia,serif;outline:none;
+ box-shadow:inset 0 1px 4px rgba(60,35,15,.12)
+}
+select:focus{border-color:#5d3a22;box-shadow:0 0 0 3px rgba(139,94,60,.16)}
+.hint{font-size:.85rem;color:#866b4e;margin:11px 0 0;font-style:italic}
+.stage{position:relative;z-index:1;display:flex;justify-content:center;align-items:center;min-height:270px;padding:24px 0 8px}
+.envelope-wrap{width:min(100%,440px);height:240px;position:relative;perspective:1000px;cursor:pointer;outline:none}
+.envelope{
+ position:absolute;inset:28px 12px 12px;background:#b98955;
+ box-shadow:0 12px 25px rgba(58,34,17,.25);border-radius:2px;overflow:visible;
+}
+.envelope:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#c99c67,#a97745);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%);z-index:3}
+.envelope:after{content:"";position:absolute;inset:0;background:linear-gradient(45deg,rgba(80,44,19,.14),transparent 45%);clip-path:polygon(0 0,50% 58%,0 100%);z-index:4}
+.flap{
+ position:absolute;left:0;right:0;top:0;height:58%;background:linear-gradient(160deg,#d3aa73,#b88651);
+ clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .9s cubic-bezier(.2,.7,.2,1);z-index:5;
+ filter:drop-shadow(0 3px 2px rgba(52,30,14,.15));
+}
+.seal{
+ position:absolute;z-index:7;left:50%;top:47%;transform:translate(-50%,-50%);
+ width:47px;height:47px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a34e38,#6f241d 72%);
+ color:#e8c99a;display:grid;place-items:center;font-size:1.25rem;
+ box-shadow:0 3px 7px rgba(45,20,10,.35);transition:opacity .25s,transform .4s;
+}
+.letter-peek{
+ position:absolute;z-index:2;left:8%;right:8%;bottom:18px;height:82%;background:#f3e6ca;
+ border:1px solid rgba(91,60,32,.25);transition:transform 1s .25s cubic-bezier(.2,.7,.2,1);
+ display:flex;align-items:flex-start;justify-content:center;padding-top:25px;color:#8b6845;font-style:italic;
+}
+.envelope-wrap.open .flap{transform:rotateX(180deg);z-index:1}
+.envelope-wrap.open .letter-peek{transform:translateY(-125px)}
+.envelope-wrap.open .seal{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+.open-prompt{position:absolute;bottom:-5px;left:0;right:0;text-align:center;font-size:.86rem;color:#795b3c;font-style:italic}
+.letter{
+ display:none;position:relative;z-index:2;margin:12px auto 0;max-width:650px;
+ padding:clamp(24px,5vw,44px);background:
+  radial-gradient(ellipse at 100% 0%,rgba(124,78,37,.12),transparent 28%),
+  radial-gradient(ellipse at 0% 100%,rgba(124,78,37,.10),transparent 26%),
+  repeating-linear-gradient(0deg,transparent 0 31px,rgba(111,80,49,.10) 31px 32px),
+  #f5e9ce;
+ border:1px solid rgba(98,65,35,.32);box-shadow:0 12px 30px rgba(52,31,15,.18);
+ transform:translateY(15px);opacity:0;transition:opacity .7s,transform .7s;
+}
+.letter.visible{display:block;opacity:1;transform:translateY(0)}
+.letter:after{content:"";position:absolute;inset:8px;border:1px solid rgba(112,76,43,.18);pointer-events:none}
+.letter-top{text-align:center;color:#98734d;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:24px}
+#letterText{white-space:pre-line;font-size:1.06rem;line-height:1.95;position:relative;z-index:1}
+.signature{font-style:italic}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:24px;position:relative;z-index:2}
+button{
+ border:1px solid #795333;background:#765033;color:#f7e8c8;padding:11px 18px;
+ font: .9rem Georgia,serif;letter-spacing:.04em;cursor:pointer;border-radius:2px;
+ transition:background .2s,transform .2s
+}
+button:hover{background:#53351f;transform:translateY(-1px)}
+button.secondary{background:transparent;color:#65452b}
+button.secondary:hover{background:rgba(118,80,51,.1)}
+footer{max-width:690px;text-align:center;margin:34px auto 0;color:#553a25;font-size:.95rem;line-height:1.8}
+.footer-ornament{font-size:1.3rem;color:#80603d;margin-bottom:8px}
+.smallprint{font-size:.75rem;color:#72583d;margin-top:12px}
+@media(max-width:480px){body{padding:20px 11px}.stage{min-height:240px}.envelope-wrap{height:215px}.letter{padding:25px 20px}#letterText{font-size:1rem}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+ <div class="eyebrow">A keepsake for the end of a chapter</div>
+ <h1>A Special Letter for You</h1>
+ <p class="subtitle">Please choose your own name. Jange duk bukok hok ore laing. Sila jujur</p>
+ <div class="rule">✦</div>
+</header>
+<main class="panel">
+ <div class="select-area">
+  <label for="friendSelect">Choose your name</label>
+  <select id="friendSelect">
+   <option value="">— Select your name from the list —</option>
+  </select>
+  <p class="hint">Pilih nama sendiri. This little letter is meant just for you.</p>
+ </div>
+ <div class="stage">
+  <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Open your letter">
+   <div class="letter-peek">A letter, just for you…</div>
+   <div class="envelope"><div class="flap"></div><div class="seal">✦</div></div>
+   <div class="open-prompt" id="openPrompt">Choose your name, then tap the envelope</div>
+  </div>
+ </div>
+ <article class="letter" id="letter" aria-live="polite">
+  <div class="letter-top">✦ A personal note · SPM 2026 ✦</div>
+  <div id="letterText"></div>
+  <div class="actions">
+   <button class="secondary" id="backBtn" type="button">Choose another name</button>
+   <button id="printBtn" type="button">Print this letter</button>
+  </div>
+ </article>
+</main>
+<footer>
+ <div class="footer-ornament">❧ ✦ ❧</div>
+ Thank you for leaving such a meaningful mark on my life. And yes, I used AI—strictly as a translator so my English doesn't flop. Here’s to late nights turning into morning light—may Allah write straight A+ in your favor.
+</footer>
+<div class="smallprint" style="text-align:center">Made with friendship, memories, and a little coffee-stained nostalgia.</div>
+</div>
+<script>
+const friends = [
+["Khairi",`Dear Khairi,
+Five years straight as classmates—what a ride! Thank you for making this whole SPM struggle feel a lot lighter and more memorable. Wishing us both straight A+ on our SPM results. Let's make it happen!
+Best,
+Your Friend`],
+["Siraj",`Dear Siraj, one of my truest friends who has always been there by my side,
+Thank you for always keeping me company and for helping me understand and survive Add Math. Don't forget to treat me to Nasi Kandar again next time!
+Sincerely,
+Your Friend`],
+["Anis B.",`Dear Anis B.,
+The quietest yet most peaceful presence in our class. Even though you don't talk much, thank you for being such a sweet and calm classmate throughout our school journey. Wishing you all the best in SPM—may straight A+ be yours!
+Sincerely,
+Your Friend`],
+["A. Nufail",`Dear Nufail (Pael),
+O Captain, My Captain, our legendary KP! Let's be real—you skipped morning assemblies way too often and slacked off on duties, but somehow you were still the absolute best KP for Batch 09. Wishing us both straight A+ on our SPM exams. “Pehey dok? Tobak, tok pehey!”
+Best,
+Your Friend`],
+["A. Nuqman",`Dear Nuqman,
+The one and only Nuqman—my go-to guy for all my jokes. Forgive me if I ever crossed the line or hurt your feelings. Just please, no more crying sessions like that time after UBBI! Here's to hoping we both crush SPM and get straight A+.
+Best,
+Your Friend`],
+["Durrani",`Dear Duranni,
+The ultimate Chemistry wizard of the class! Thanks for sharing your brainpower and keeping us from blowing up the science lab all these years. Let's crush this SPM exam and secure those straight A+. You've got this!
+Best,
+Your Friend`],
+["Fatin",`Dear Fatin,
+Tiny but mighty (and low-key scary). Thanks for bringing such great energy to the class, and a massive thank you for your amazing cookies—they're honestly the best. Let's crush this SPM exam and secure those straight A+.
+Best,
+Your Friend`],
+["Haziq Fahmi",`Dear Haziq,
+My friend who is super obsessed with cleanliness and has a bit of a short temper. Thank you for always keeping our classroom clean, and I'm sorry for constantly trolling/teasing you every time you got mad at the class for being messy. Hehe. Please don't take it to heart. Wishing us both 11A+ in SPM!
+Sincerely,
+Your Friend`],
+["Intan",`Dear Intan,
+The real backbone behind our KP! Thanks for all your hard work, patience, and dedication in keeping the school (and us) in line all these years. Let’s crush this SPM exam and secure those straight A+. You deserve it!
+Best,
+Your Friend`],
+["Maryam (Yye)",`Dear Maryam,
+How is it even possible to be a funny person in class and an absolute Arabic genius at the same time? Thanks for all the laughs, the good vibes, and for saving us whenever Arabic gets too confusing. Let's crush SPM and secure those straight A+!
+Best,
+Your Friend`],
+["Adey",`Dear Adam,
+Honestly, you’re a walking contradiction. Late to school every day, homework never done, and always looking untidy. Still, I see how hard you try to improve yourself silently, without ever complaining or telling anyone what you’re going through. Respect and thank you for that. Wishing you 11A+ for SPM—you deserve it.
+Best,
+Your Friend`],
+["Ilham",`Dear Ilham,
+The ultimate Add Math freak of our school—pretty sure you're secretly an alien, not a human. Jokes aside, thank you for constantly tutoring and helping me out with Add Math. Thanks for being an awesome YTC67 mentor who taught me a ton, and my apologies for any rough words in the past. Here's to hoping 11A+ is ours, Insya-Allah!
+Best,
+Your Friend`],
+["Iqmal",`Dear Iqmal,
+Do us all a favor and retire your terrible jokes; my IQ drops every time you tell one. Also, please lower your volume—your loud yelling gives everyone a headache! Anyway, all the best for SPM. May straight A+ be ours, Insya-Allah.
+Best,
+Your Friend`],
+["Najwa",`Dear Najwa,
+We’ve shared a classroom for two years now, though we've probably exchanged less than ten sentences! Jokes aside, thank you for always bringing calm, innocent vibes to the class. Here’s to wishing you the very best in SPM and beyond—straight A+ Insya-Allah!
+Best,
+Your Friend`],
+["Neesa",`Dear Neesa,
+From solving Sudoku puzzles in class to becoming an internationally renowned writer someday—I’m rooting for you! Thank you so much for being an awesome classmate throughout our school journey. Here’s to hoping 11A belongs to you in SPM!
+Best,
+Your Friend`],
+["Falique",`Dear Falique,
+A total freak with insane drawing skills. Not gonna lie, your face is the spitting image of an Angry Bird, but hey—I still love you anyway. Thanks for being right there with me through this whole journey.
+Best,
+Your Friend`],
+["Farahani",`Dear Farahani,
+A true silent genius, and low-key probably a killer in disguise! You don't say much, but when you do—or when results come out—you always shock everyone. Thank you for being an awesome classmate, and may straight A+ be yours in SPM!
+Sincerely,
+Your Friend`],
+["Izni",`Dear Izni,
+Intan's partner in crime and an amazing classmate! Thanks for all the sweet memories. May Allah bless you with straight A+ in SPM!
+Yours truly,
+Your Friend`],
+["Aisya",`Dear Aisya,
+The biggest teaser in class who somehow also holds the title of assistant class monitor! Thanks for keeping things lively and for tolerating all of us throughout this journey. Let's crush SPM and secure those straight A+. You got this!
+Best,
+Your Friend`],
+["Anis A.",`Dear Anis A.,
+High school definitely wouldn't have been as entertaining without you and Aira constantly gang-teasing Iqmal! Thanks for all the laughs, good vibes, and great memories over the years. Let's crush SPM and secure those straight A+!
+Best,
+Your Friend`],
+["Humaira",`Dear Humaira,
+Our class's biggest green enthusiast—at least, that's what Iqmal told me! Jokes aside, thank you for always bringing such fresh and positive vibes to the classroom. Wishing you all the best in SPM, and may straight A+ be yours!
+Sincerely,
+Your Friend`],
+["Irdhina",`Dear Irdhina,
+We barely ever talked to each other, though I'm pretty sure you're way chattier with everyone else! Jokes aside, thank you for being an awesome classmate throughout our high school journey. Wishing you all the best in SPM—may straight A+ be yours!
+Sincerely,
+Your Friend`],
+["Khairunnisa",`Dear Khairunnisa,
+Our super reliable PSS prefect who turns into an absolute chatterbox on WhatsApp! Thanks for two awesome years of being my classmate—you always bring such cute and positive vibes to the class. Wishing you all the best in SPM, and may straight A+ be yours!
+Sincerely,
+Your Friend`],
+["Auni Huda",`Dear Auni Huda,
+High school definitely wouldn't have been the same without you constantly teasing me every single day! Thanks for all the laughs, banter, and good memories over the years. Let's crush SPM and secure those straight A+!
+Best,
+Your Friend`],
+["Sharifah Amalin",`Dear Sharifah Amalin,
+The ultimate class sleeper who somehow still manages to be a freaking genius! Seriously, teach us all how you absorb knowledge through osmosis while napping. Thanks for being an awesome classmate, and may straight A+ be yours in SPM!
+Sincerely,
+Your Friend`],
+["Aira",`Dear Aira,
+The other half of the legendary duo (with Anis A.) whose favorite pastime is teasing Iqmal! Thank you for always bringing so much laughter, good energy, and fun moments into our classroom. Wishing you all the best in SPM—may straight A+ be yours!
+Sincerely,
+Your Friend`],
+["Lutfil Hadi",`Dear Hadi,
+Second year in the same class, and sadly our last year together in school. Even though our friendship started a bit late, thank you so much for being a part of my life. Get well soon from the flu (influenza)! Here's to hoping we both smash SPM with 11A+.
+Best,
+Your Friend`],
+["Adrus",`Dear Adrus,
+My sporty homie and late-arrival partner. Thanks for sharing two great years as classmates. May you bag that A+ in Biology!
+Yours truly,
+Your Friend`],
+["Nayli",`Dear Nayli,
+Certified smart kid (still idk how you do it, honestly). Thanks for putting up with me and being an awesome classmate for over five years! Wishing you all the best in SPM—may Allah grant you 11A+!
+Best,
+Your Friend`]
+];
+
+const select = document.getElementById('friendSelect');
+const envelope = document.getElementById('envelope');
+const letter = document.getElementById('letter');
+const letterText = document.getElementById('letterText');
+const prompt = document.getElementById('openPrompt');
+friends.forEach(([name], i) => {
+ const option = document.createElement('option');
+ option.value = String(i);
+ option.textContent = name;
+ select.appendChild(option);
+});
+function closeLetter(){
+ envelope.classList.remove('open');
+ letter.classList.remove('visible');
+ letter.style.display='none';
+ prompt.textContent = select.value === '' ? 'Choose your name, then tap the envelope' : 'Tap the envelope to reveal your letter';
+}
+function openLetter(){
+ if(select.value === '') { select.focus(); prompt.textContent='Choose your own name first, please!'; return; }
+ const [, message] = friends[Number(select.value)];
+ letterText.textContent = message;
+ envelope.classList.add('open');
+ prompt.textContent='Your letter is opening…';
+ window.setTimeout(()=>{
+   letter.style.display='block';
+   requestAnimationFrame(()=>letter.classList.add('visible'));
+   letter.scrollIntoView({behavior:'smooth',block:'nearest'});
+   prompt.textContent='A little message, from me to you';
+ },650);
+}
+select.addEventListener('change',closeLetter);
+envelope.addEventListener('click',openLetter);
+envelope.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLetter();}});
+document.getElementById('backBtn').addEventListener('click',()=>{
+ closeLetter();select.value='';select.focus();document.querySelector('.panel').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+</script>
+<style>
+@media print{
+ body{background:white;padding:0}.page>header,.select-area,.stage,.actions,footer,.smallprint{display:none!important}
+ .panel{border:0;box-shadow:none;background:white;padding:0}
+ .panel:before{display:none}.letter{display:block!important;opacity:1!important;transform:none!important;box-shadow:none;background:#fff;border:1px solid #aaa}
+}
+</style>
+</body>
+</html>
